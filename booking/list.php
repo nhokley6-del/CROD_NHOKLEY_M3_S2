@@ -1,0 +1,72 @@
+<?php
+session_start();
+if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
+    header("Location: ../login/login.php");
+    exit;
+}
+include "../config/db.php"; ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking List</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: pink; padding: 20px; }
+        h2 { color: #333; border-bottom: 2px solid #28a745; padding-bottom: 10px; display: inline-block; }
+        table { width: 100%; border-collapse: collapse; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.05); margin-top: 20px; }
+        th, td { padding: 12px 15px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #28a745; color: #fff; text-transform: uppercase; font-size: 0.9em; }
+        tr:nth-child(even) { background-color: #f8f9fa; }
+        tr:hover { background-color: #f1f1f1; }
+        .btn { text-decoration: none; padding: 6px 12px; background: #28a745; color: white; border-radius: 4px; font-size: 0.9em; margin-right: 5px; transition: opacity 0.3s; }
+        .btn:hover { opacity: 0.9; }
+        .btn-convert { background: #17a2b8; }
+        .btn-back { background: #6c757d; }
+        .btn-back:hover { background: #5a6268; }
+    </style>
+</head>
+<body>
+
+<h2>Booking List</h2>
+<br><br>
+<a href="../index.php" class="btn btn-back">← Back</a>
+<a href="create.php" class="btn"> + New Booking</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Guest</th>
+            <th>CheckIn</th>
+            <th>CheckOut</th>
+            <th>Prepaid</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php
+        $q = mysqli_query($conn, "
+            SELECT tbBooking.*, tbGuest.GuestName
+            FROM tbBooking
+            JOIN tbGuest ON tbBooking.GuestID = tbGuest.GuestID
+            ORDER BY tbBooking.BookingID DESC");
+
+        while ($r = mysqli_fetch_assoc($q)) {
+        ?>
+            <tr>
+                <td><?= $r['BookingID'] ?></td>
+                <td><?= htmlspecialchars($r['GuestName']) ?></td>
+                <td><?= $r['CheckInDate'] ?></td>
+                <td><?= $r['CheckOutDate'] ?></td>
+                <td>$<?= number_format($r['TotalPrepaid'], 2) ?></td>
+                <td>
+                    <a href="to_checkin.php?id=<?= $r['BookingID'] ?>" class="btn btn-convert">Convert ➜ CheckIn</a>
+                </td>
+            </tr>
+        <?php } ?>
+    </tbody>
+</table>
+
+</body>
+</html>
